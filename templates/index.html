@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+   
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap" rel="stylesheet">
+
     <style>
         * {
             padding: 0;
@@ -7,39 +18,92 @@
             box-sizing: border-box;
         }
 
-        #form {
-            margin: 20px;
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 18px;
+            line-height: 1.2;
         }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            border: 1px solid #777;
+            text-align: center;
+        }
+
+        #form {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .list-container {
+            width: 300px;
+            text-align: left;
+        }
+
 
         .hidden {
             display: none;
         }
     </style>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo App</title>
 </head>
 <body>
-    <form id="form">
-        <input type="text" name="description" id="description">
-        <input type="submit" value="Create">
-    </form>
+    <div class="container">
+        <form id="form">
+            <input type="text" name="description" id="description">
+            <input type="submit" value="Create">
+        </form>
+    
+        <div id="error" class="hidden">Something went wrong!!</div>
 
-    <div id="error" class="hidden">Something went wrong!!</div>
-
-    <ul id="todos">
-        {% for d in data %}
-        <li>{{ d.description }}</li>
-        {% endfor %}
-    </ul>
-
+        <div class="list-container">
+            <ul id="todos">
+                {% for todo in todos %}
+                <li>
+                     <input type="checkbox" data-id="{{ todo.id }}" class="check-completed" {% if todo.completed %} checked {% endif %}  >
+                     {{ todo.description }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    
+    </div>
+    
     <script>
         const inputForm = document.getElementById('form')
         const description = document.getElementById('description')
         const list = document.getElementById('todos')
         const errorMessage = document.getElementById('error')
+
+        const checkboxes = document.querySelectorAll('.check-completed')
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i]
+
+            checkbox.onchange = function(e) {
+                console.log(e)
+
+                const newCompleted = e.target.checked;
+                const todoId = e.target.dataset['id']
+
+                fetch('/todos/' + todoId + '/set-completed', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'completed': newCompleted
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function() {
+                    error.className = 'hidden'
+                })
+                .catch(function() {
+                    error.className = ''
+                })
+            }
+        }
 
         inputForm.onsubmit = function(e) {
             e.preventDefault()
