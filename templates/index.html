@@ -42,6 +42,24 @@
             text-align: left;
         }
 
+        #todos {
+            width: 200px;
+        }
+
+        #todos li {
+            clear: both;
+            margin: 8px 0;
+        }
+
+        .btn-del {
+            color: red;
+            font-size: 18px;
+            outline: none;
+            border: none;
+            float: right;
+            cursor: pointer;
+        }
+
 
         .hidden {
             display: none;
@@ -62,7 +80,8 @@
                 {% for todo in todos %}
                 <li>
                      <input type="checkbox" data-id="{{ todo.id }}" class="check-completed" {% if todo.completed %} checked {% endif %}  >
-                     {{ todo.description }}
+                     {{ todo.description }} 
+                     <button data-id="{{ todo.id }}" class="btn-del">&cross;</button>
                 </li>
                 {% endfor %}
             </ul>
@@ -77,6 +96,19 @@
         const errorMessage = document.getElementById('error')
 
         const checkboxes = document.querySelectorAll('.check-completed')
+        const delBtns = document.querySelectorAll('.btn-del')
+
+        for (let i = 0; i < delBtns.length; i++) {
+            const delBtn = delBtns[i]
+            delBtn.addEventListener('click', function(e) {
+                const todoId = e.target.dataset['id']
+                console.log(todoId)
+
+                fetch('/todos/' + todoId, {
+                    method: 'DELETE'
+                })
+            })
+        }
 
         for (let i = 0; i < checkboxes.length; i++) {
             const checkbox = checkboxes[i]
